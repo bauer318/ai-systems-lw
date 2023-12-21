@@ -1,5 +1,5 @@
 import numpy as np
-
+from numpy import linalg
 from map_displayer import display_map
 from measure_worker import brand_matrix, color_matrix, get_brand_distance, get_motorcycle_distance, \
     calculate_measure_using_euclidean_distance, calculate_measure_using_cosine_distance
