@@ -1,5 +1,8 @@
 import pandas as pd
 
+from datasetitem import DatasetItem
+from reader import get_dataset_array
+
 
 def convert_value(value):
     if value == "":
@@ -61,3 +64,13 @@ def check_max(dataset_array, calculate_measure):
 
 def create_measure_distance_matrix(measure_distance_dictionary):
     return pd.DataFrame.from_dict(measure_distance_dictionary)
+
+
+def get_item_by_name(name: str) -> DatasetItem | None:
+    if str == "":
+        return None
+    items = get_dataset_array()
+    for item in items:
+        if item.name == name:
+            return item
+    return None

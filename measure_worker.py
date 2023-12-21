@@ -5,15 +5,7 @@ from datasetitem import DatasetItem
 from measure_distance_worker import calculate_euclidean_distance, calculate_jaccard, calculate_cosine_measure
 from ranger import Ranger
 from util import get_motorcycle_type, convert_value
-
-
-class WeightMeasure(Enum):
-    LargeWeight = 1
-    NotVeryLargeWeight = 2
-    AverageWeight = 3
-    SmallWeight = 4
-    VerySmallWeight = 5
-
+from weight_measure import WeightMeasure
 
 motorcycle_graph = nx.Graph()
 
@@ -233,6 +225,19 @@ def calculate_jaccard_measure(item_1, item_2) -> float:
     attribute_2 = [item_2.exist_navigator, item_2.exist_compressor, item_2.exist_headlight, item_2.exist_turn_signal,
                    item_2.exist_radio_system]
     return calculate_jaccard(attribute_1, attribute_2)
+
+
+def get_measure_for_weight(weight: float) -> WeightMeasure:
+    if weight > 320:
+        return WeightMeasure.LargeWeight
+    elif weight > 285:
+        return WeightMeasure.NotVeryLargeWeight
+    elif weight > 195:
+        return WeightMeasure.AverageWeight
+    elif weight > 150:
+        return WeightMeasure.SmallWeight
+    else:
+        return WeightMeasure.VerySmallWeight
 
 
 def calculate_ranger(items: list[DatasetItem]) -> Ranger:
