@@ -38,7 +38,7 @@ class RecommendationSystem:
             )
             decremented_w = liked_name[1]
             if disliked_name is not None:
-                decremented_w -= disliked_name[0]
+                decremented_w -= disliked_name[1]
             motorcycles_name.append((liked_name[0], decremented_w))
         motorcycles_name = sorted(motorcycles_name, key=lambda x: x[1])
 
@@ -66,7 +66,6 @@ class RecommendationSystem:
         result = sorted(result.items(), key=lambda x: x[1])
         if limit is not None:
             result = result[:limit]
-        print(result)
         return result
 
     def query_liked_motorcycles(self, liked_items: list[DatasetItem], limit: Optional[int]) -> list[DatasetItem]:

@@ -1,11 +1,12 @@
-from simple_term_menu import TerminalMenu
+from InquirerPy import inquirer
 
 from contentBasedRecomendationSystem.recomendation_strategy import RecommendationStrategy
 from contentBasedRecomendationSystem.recomendattion_system import RecommendationSystem, \
-    get_recommendation_after_filtration
+    get_recommendation_after_filtration, get_recommendation_before_filtration
 from filter import Filter
 from map_displayer import display_map
 from measure_worker import calculate_measure_using_euclidean_distance, calculate_measure_using_cosine_distance
+from util import get_motorcycle_type
 
 options = [
     "Вывести все записи",
@@ -28,10 +29,12 @@ main_filter = Filter()
 
 def main_loop(recommendation_system: RecommendationSystem, liked_items, disliked_items) -> int:
     global main_filter
-    terminal_menu = TerminalMenu(options)
-    selected_menu_index = terminal_menu.show()
-    match selected_menu_index:
-        case 0:
+    selected_menu = inquirer.select(
+        message="",
+        choices=options
+    ).execute()
+    match selected_menu:
+        case "Вывести все записи":
             items = recommendation_system.query_all_items(None)
             for i, item in enumerate(items):
                 liked = "" if i not in liked_items else "👍"
@@ -40,11 +43,11 @@ def main_loop(recommendation_system: RecommendationSystem, liked_items, disliked
                     f"{i:2}) {liked:1} {disliked:1} {item.name} {item.brand}: {item.color} масса={item.weight} "
                     f"Объем двигателя={item.engine_capacity}")
             return 0
-        case 1:
+        case "Визуализировать матрицу расстояний":
             display_map(recommendation_system.items, 'Euclidean distance', calculate_measure_using_euclidean_distance)
             display_map(recommendation_system.items, 'Cosine distance', calculate_measure_using_cosine_distance)
             return 0
-        case 2:
+        case "Поставить лайк":
             item_index_str = input()
             try:
                 item_index_int = int(item_index_str)
@@ -61,7 +64,7 @@ def main_loop(recommendation_system: RecommendationSystem, liked_items, disliked
                 liked_items.append(item_index_int)
                 print("Лайк мотоцикл")
             return 0
-        case 3:
+        case "Сбросить лайк":
             item_index_str = input()
             try:
                 item_index_int = int(item_index_str)
@@ -72,9 +75,9 @@ def main_loop(recommendation_system: RecommendationSystem, liked_items, disliked
                 print("Мотоцикл вне списка лайков")
                 return -1
             else:
-                del liked_items[liked_items.index[item_index_int]]
+                del liked_items[liked_items.index(item_index_int)]
                 print('Мотоцикл уделен из списка лайков')
-        case 4:
+        case "Поставить дизлайк":
             item_index_str = input()
             try:
                 item_index_int = int(item_index_str)
@@ -90,7 +93,7 @@ def main_loop(recommendation_system: RecommendationSystem, liked_items, disliked
             else:
                 disliked_items.append(item_index_int)
                 print("Дизлайк мотоцикл")
-        case 5:
+        case "Сбросить дизлайк":
             item_index_str = input()
             try:
                 item_index_int = int(item_index_str)
@@ -101,35 +104,44 @@ def main_loop(recommendation_system: RecommendationSystem, liked_items, disliked
                 print("Мотоцикл вне списка дизлайков")
                 return -1
             else:
-                del disliked_items[disliked_items.index[item_index_int]]
+                del disliked_items[disliked_items.index(item_index_int)]
                 print('Мотоцикл уделен из списка дизлайков')
-        case 6:
+        case "Установить фильтр":
             main_filter = set_filter(main_filter)
             return 0
-        case 7:
+        case "Сбросить фильтр":
             main_filter = Filter()
             return 0
-        case 8:
+        case "Вывести фильтр":
             print_current_filter(main_filter)
             return 0
-        case 9:
+        case "Установить функцию меры":
             return choose_measure_function(recommendation_system)
-        case 10:
+        case "Установить стратегию рекомендации":
             return choose_recommendation_strategy(recommendation_system)
-        case 11:
+        case "Получить рекомендацию":
             all_items = recommendation_system.query_all_items(None)
             liked_items = [item for (i, item) in enumerate(all_items) if i in liked_items]
             disliked_items = [item for (i, item) in enumerate(all_items) if i in disliked_items]
-            items = []
             if recommendation_system.recommendation_strategy == RecommendationStrategy.FilterRecommend:
-                items = get_recommendation_after_filtration(recommendation_system, liked_items, disliked_items,
-                                                            main_filter)
-            for i, item in enumerate(items):
-                print(
-                    f"{i:2}) {item.name} {item.brand}: {item.color} масса={item.weight} "
-                    f"Объем двигателя={item.engine_capacity}")
-            return 0
-        case 12:
+                print("\n========== Рекомендация ==========\n")
+                for i, item in enumerate(
+                        get_recommendation_after_filtration(recommendation_system, liked_items, disliked_items,
+                                                            main_filter)):
+                    print(
+                        f"{i:2}) {item.name} {item.brand}: {item.color} масса={item.weight} "
+                        f"Объем двигателя={item.engine_capacity} type:{get_motorcycle_type(item)}")
+                return 0
+            else:
+                print("\n========== Рекомендация ==========\n")
+                for i, item in enumerate(
+                        get_recommendation_before_filtration(recommendation_system, liked_items, disliked_items,
+                                                             main_filter)):
+                    print(
+                        f"{i:2}) {item.name} {item.brand}: {item.color} масса={item.weight} "
+                        f"Объем двигателя={item.engine_capacity} type:{get_motorcycle_type(item)}")
+                return 0
+        case "Выход":
             print("Out")
             return 1
         case _:
@@ -140,11 +152,13 @@ def main_loop(recommendation_system: RecommendationSystem, liked_items, disliked
 
 def choose_measure_function(recommendation_system: RecommendationSystem):
     choose_measure_option = ["Euclidean", "Cosine"]
-    terminal_menu = TerminalMenu(choose_measure_option)
-    selected_menu_index = terminal_menu.show()
-    if selected_menu_index == 0:
+    selected_menu = inquirer.select(
+        message="",
+        choices=choose_measure_option
+    ).execute()
+    if selected_menu == "Euclidean":
         recommendation_system.calculate_measure_func(calculate_measure_using_euclidean_distance)
-    elif selected_menu_index == 1:
+    elif selected_menu == "Cosine":
         recommendation_system.calculate_measure_func(calculate_measure_using_cosine_distance)
     else:
         print("Choose measure function")
@@ -178,72 +192,107 @@ def set_filter(filter_element: Filter) -> Filter:
         "Наличие аудиосистемы",  # 21
     ]
 
-    terminal_menu = TerminalMenu(choose_measure_option)
-    selected_menu_index = terminal_menu.show()
-    match selected_menu_index:
-        case 0:
+    selected_menu = inquirer.select(
+        message="",
+        choices=choose_measure_option
+    ).execute()
+    match selected_menu:
+        case "Название":
             filter_element.name = input("Название мотоцикла : ")
-        case 1:
+        case "Марка":
             filter_element.brand = input("Марка: ")
-        case 2:
-            choose_option = TerminalMenu(["Начальная масса", "Окончательная масса"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
-                filter_element.weight_min = float(input("Начальная масса : "))
+        case "Масса":
+            choose_option = ["Маленькая", "Очень не большая", "Средняя", "Не очень большая", "Большая"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Маленькая":
+                filter_element.weight_max = 100
+            elif selected_menu == "Очень не большая":
+                filter_element.weight_min = 100
+                filter_element.weight_max = 150
+            elif selected_menu == "Очень не большая":
+                filter_element.weight_min = 150
+                filter_element.weight_max = 215
+            elif selected_menu == "Очень не большая":
+                filter_element.weight_min = 215
+                filter_element.weight_max = 320
             else:
-                filter_element.weight_max = float(input("Окончательная масса : "))
-        case 3:
-            choose_option = TerminalMenu(["Начальный объем двигателя", "Окончательный объем двигателя"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+                filter_element.weight_min = 320
+        case "Объем двигателя":
+            choose_option = ["Начальный объем двигателя", "Окончательный объем двигателя"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальный объем двигателя":
                 filter_element.engine_capacity_min = float(input("Начальный объем двигателя : "))
             else:
                 filter_element.engine_capacity_min = float(input("Окончательный объем двигателя : "))
-        case 4:
+        case "Цвет":
             filter_element.color = input("Цвет [Красный, Черный, Синий, Серое, Желтый, Зеленый, Темно-синий, Белый]")
-        case 5:
-            choose_option = TerminalMenu(["Начальный дорожный просвет", "Окончательный дорожный просвет"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Дорожный просвет":
+            choose_option = ["Начальный дорожный просвет", "Окончательный дорожный просвет"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальный дорожный просвет":
                 filter_element.ground_clearance_min = float(input("Начальный дорожный просвет : "))
             else:
                 filter_element.ground_clearance_max = float(input("Окончательный дорожный просвет : "))
-        case 6:
-            choose_option = TerminalMenu(["Начальная высота посадки", "Окончательная высота посадки"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Высота посадки":
+            choose_option = ["Начальная высота посадки", "Окончательная высота посадки"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальная высота посадки":
                 filter_element.landing_height_min = float(input("Начальная высота посадки : "))
             else:
                 filter_element.landing_height_max = float(input("Окончательная высота посадки : "))
-        case 7:
-            choose_option = TerminalMenu(["Начальное количество места", "Окончательное количество места"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Количество места":
+            choose_option = ["Начальное количество места", "Окончательное количество места"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальное количество места":
                 filter_element.seats_min = float(input("Начальное количество места : "))
             else:
                 filter_element.seats_max = float(input("Окончательное количество места : "))
-        case 8:
-            choose_option = TerminalMenu(["Начальная максимальная скорость", "Окончательная максимальная скорость"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Максимальная скорость":
+            choose_option = ["Начальная максимальная скорость", "Окончательная максимальная скорость"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальная максимальная скорость":
                 filter_element.max_speed_min = float(input("Начальная максимальная скорость : "))
             else:
                 filter_element.max_speed_max = float(input("Окончательная максимальная скорость : "))
-        case 9:
-            choose_option = TerminalMenu(["Начальная мощность", "Окончательная мощность"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Мощность":
+            choose_option = ["Начальная мощность", "Окончательная мощность"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальная мощность":
                 filter_element.power_min = float(input("Начальная мощность : "))
             else:
                 filter_element.power_max = float(input("Окончательная мощность : "))
-        case 10:
-            choose_option = TerminalMenu(["Начальный объем топливного бака", "Окончательный объем топливного бака"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Объем топливного бака":
+            choose_option = ["Начальный объем топливного бака", "Окончательный объем топливного бака"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальный объем топливного бака":
                 filter_element.fuel_tank_capacity_min = float(input("Начальный объем топливного бака : "))
             else:
                 filter_element.fuel_tank_capacity_max = float(input("Окончательный объем топливного бака : "))
-        case 11:
+        case "Наличие навигатора (Да/Нет)":
             exist_element_input = input("Наличие навигатора Да или Нет")
             if exist_element_input == "Да":
                 filter_element.exist_navigator = True
@@ -251,7 +300,7 @@ def set_filter(filter_element: Filter) -> Filter:
                 filter_element.exist_navigator = False
             else:
                 print("Наличие навигатора Да или Нет")
-        case 12:
+        case "Наличие компрессора (Да/Нет)":
             exist_element_input = input("Наличие компрессора Да или Нет")
             if exist_element_input == "Да":
                 filter_element.exist_compressor = True
@@ -259,14 +308,17 @@ def set_filter(filter_element: Filter) -> Filter:
                 filter_element.exist_compressor = False
             else:
                 print("Наличие компрессора Да или Нет")
-        case 13:
-            choose_option = TerminalMenu(["Начальная высота", "Окончательная высота"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Высота":
+            choose_option = ["Начальная высота", "Окончательная высота"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальная высота":
                 filter_element.height_min = float(input("Начальная высота : "))
             else:
                 filter_element.height_max = float(input("Окончательная высота : "))
-        case 14:
+        case "Наличие фары (Да/Нет)":
             exist_element_input = input("Наличие фары Да или Нет")
             if exist_element_input == "Да":
                 filter_element.exist_headlight = True
@@ -274,7 +326,7 @@ def set_filter(filter_element: Filter) -> Filter:
                 filter_element.exist_headlight = False
             else:
                 print("Наличие фары Да или Нет")
-        case 15:
+        case "Наличие поворотник (Да/Нет)":
             exist_element_input = input("Наличие поворотник Да или Нет")
             if exist_element_input == "Да":
                 filter_element.exist_turn_signal = True
@@ -282,44 +334,59 @@ def set_filter(filter_element: Filter) -> Filter:
                 filter_element.exist_turn_signal = False
             else:
                 print("Наличие поворотник Да или Нет")
-        case 16:
-            choose_option = TerminalMenu(["Начальное количество цилиндров", "Окончательное количество цилиндров"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Количество цилиндров":
+            choose_option = ["Начальное количество цилиндров", "Окончательное количество цилиндров"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальное количество цилиндров":
                 filter_element.cylinder_number_min = float(input("Начальное количество цилиндров : "))
             else:
                 filter_element.cylinder_number_max = float(input("Окончательное количество цилиндров : "))
-        case 17:
-            choose_option = TerminalMenu(["Начальная грузоподъемность", "Окончательная грузоподъемность"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Грузоподъемность":
+            choose_option = ["Начальная грузоподъемность", "Окончательная грузоподъемность"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальная грузоподъемность":
                 filter_element.load_capacity_min = float(input("Начальная грузоподъемность : "))
             else:
                 filter_element.load_capacity_max = float(input("Окончательная грузоподъемность : "))
-        case 18:
-            choose_option = TerminalMenu(["[0] Автоматический", "[1] Вариатор", "[2] Не важно"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Трансмиссия (Автоматический/Вариатор)":
+            choose_option = ["Автоматический", "Вариатор", "Не важно"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Автоматический":
                 filter_element.transmission = "Автоматический"
-            elif selected_index == 1:
+            elif selected_menu == "Вариатор":
                 filter_element.transmission = "Вариатор"
             else:
                 filter_element.transmission = "Empty"
-        case 19:
-            choose_option = TerminalMenu(["Начальный Крутящий момент", "Окончательный Крутящий момент"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Крутящий момент":
+            choose_option = ["Начальный Крутящий момент", "Окончательный Крутящий момент"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальный Крутящий момент":
                 filter_element.torque_min = float(input("Начальный Крутящий момент : "))
             else:
                 filter_element.torque_max = float(input("Окончательный Крутящий момент : "))
-        case 20:
-            choose_option = TerminalMenu(["Начальный объем багажника", "Окончательный объем багажника"])
-            selected_index = choose_option.show()
-            if selected_index == 0:
+        case "Объем багажника":
+            choose_option = ["Начальный объем багажника", "Окончательный объем багажника"]
+            selected_menu = inquirer.select(
+                message="",
+                choices=choose_option
+            ).execute()
+            if selected_menu == "Начальный объем багажника":
                 filter_element.trunk_volume_min = float(input("Начальный объем багажника : "))
             else:
                 filter_element.trunk_volume_max = float(input("Окончательный объем багажника : "))
-        case 21:
+        case "Наличие аудиосистемы":
             exist_element_input = input("Наличие аудиосистемы Да или Нет")
             if exist_element_input == "Да":
                 filter_element.exist_radio_system = True
@@ -333,12 +400,14 @@ def set_filter(filter_element: Filter) -> Filter:
 
 def choose_recommendation_strategy(recommendation_system: RecommendationSystem):
     choose_strategy_option = ["Фильтрация -> Рекомендация", "Рекомендация -> Фильтрация"]
-    terminal_menu = TerminalMenu(choose_strategy_option)
-    selected_index = terminal_menu.show()
+    selected_menu = inquirer.select(
+        message="",
+        choices=choose_strategy_option
+    ).execute()
 
-    if selected_index == 0:
+    if selected_menu == "Фильтрация -> Рекомендация":
         recommendation_system.recommendation_strategy = RecommendationStrategy.FilterRecommend
-    elif selected_index == 1:
+    elif selected_menu == "Рекомендация -> Фильтрация":
         recommendation_system.recommendation_strategy = RecommendationStrategy.RecommendFilter
     else:
         choose_recommendation_strategy(recommendation_system)

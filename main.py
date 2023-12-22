@@ -1,4 +1,5 @@
 import numpy as np
+from InquirerPy import inquirer
 from numpy import linalg
 
 from cli import main_loop
