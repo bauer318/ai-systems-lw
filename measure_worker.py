@@ -73,12 +73,12 @@ brand_matrix = [
     [0.9, 0.7, 0.9, 0.8, 0.9, 0.2, 0.9, 0.3, 0.5, 0.1, 0.5, 0.5, 0.2, 0.7, 0.4, 0.5, 0.2, 0.3, 0.4, 0.0],
 ]
 
-w_jaccard = 0.2
+w_jaccard = 0.4
 
 w_color = 0.6
 w_transmission = 0.8
-w_brand = 0.1
-w_tree = 0.4
+w_brand = 0.5
+w_tree = 0.5
 w_weight = 0.01
 w_engine_capacity = 0.2
 w_ground_clearance = 0.7
