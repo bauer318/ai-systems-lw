@@ -212,10 +212,10 @@ def set_filter(filter_element: Filter) -> Filter:
             elif selected_menu == "Очень не большая":
                 filter_element.weight_min = 100
                 filter_element.weight_max = 150
-            elif selected_menu == "Очень не большая":
+            elif selected_menu == "Средняя":
                 filter_element.weight_min = 150
                 filter_element.weight_max = 215
-            elif selected_menu == "Очень не большая":
+            elif selected_menu == "Не очень большая":
                 filter_element.weight_min = 215
                 filter_element.weight_max = 320
             else:
@@ -231,7 +231,8 @@ def set_filter(filter_element: Filter) -> Filter:
             else:
                 filter_element.engine_capacity_min = float(input("Окончательный объем двигателя : "))
         case "Цвет":
-            filter_element.color = input("Цвет [Красный, Черный, Синий, Серое, Желтый, Зеленый, Темно-синий, Белый]")
+            filter_element.color = input("Цвет [Red(Красный),Black(Черный), Bleu(Синий), Grey(Серое), Yellow(Желтый), "
+                                         "Green(Зеленый), Dark-blue(Темно-синий), White(Белый)]: ")
         case "Дорожный просвет":
             choose_option = ["Начальный дорожный просвет", "Окончательный дорожный просвет"]
             selected_menu = inquirer.select(

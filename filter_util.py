@@ -3,6 +3,7 @@ from typing import Optional, Any
 from datasetitem import DatasetItem
 from filter import Filter
 from measure_worker import get_measure_for_weight
+from util import convert_value
 
 
 def filter_min(items: list, get_value_lambda, min_value: Optional[int]) -> list:
@@ -25,24 +26,24 @@ def filter_items(items: list[DatasetItem], filter_el: Filter, limit: Optional[in
     items = filter_max(items, lambda item: item.ground_clearance, filter_el.ground_clearance_max)
     items = filter_min(items, lambda item: item.landing_height, filter_el.landing_height_min)
     items = filter_max(items, lambda item: item.landing_height, filter_el.landing_height_max)
-    items = filter_min(items, lambda item: item.seats, filter_el.seats_min)
-    items = filter_max(items, lambda item: item.seats, filter_el.seats_max)
-    items = filter_min(items, lambda item: item.max_speed, filter_el.max_speed_min)
-    items = filter_max(items, lambda item: item.max_speed, filter_el.max_speed_max)
-    items = filter_min(items, lambda item: item.power, filter_el.power_min)
-    items = filter_max(items, lambda item: item.power, filter_el.power_max)
-    items = filter_min(items, lambda item: item.fuel_tanck_capacity, filter_el.fuel_tank_capacity_min)
-    items = filter_max(items, lambda item: item.fuel_tanck_capacity, filter_el.fuel_tank_capacity_max)
-    items = filter_min(items, lambda item: item.height, filter_el.height_min)
-    items = filter_max(items, lambda item: item.height, filter_el.height_max)
-    items = filter_min(items, lambda item: item.cylinder_number, filter_el.cylinder_number_min)
-    items = filter_max(items, lambda item: item.cylinder_number, filter_el.cylinder_number_max)
-    items = filter_min(items, lambda item: item.load_capacity, filter_el.load_capacity_min)
-    items = filter_max(items, lambda item: item.load_capacity, filter_el.load_capacity_max)
-    items = filter_min(items, lambda item: item.torque, filter_el.torque_min)
-    items = filter_max(items, lambda item: item.torque, filter_el.torque_max)
-    items = filter_min(items, lambda item: item.trunk_volume, filter_el.trunk_volume_min)
-    items = filter_max(items, lambda item: item.trunk_volume, filter_el.trunk_volume_max)
+    items = filter_min(items, lambda item: convert_value(item.seats), filter_el.seats_min)
+    items = filter_max(items, lambda item: convert_value(item.seats), filter_el.seats_max)
+    items = filter_min(items, lambda item: convert_value(item.max_speed), filter_el.max_speed_min)
+    items = filter_max(items, lambda item: convert_value(item.max_speed), filter_el.max_speed_max)
+    items = filter_min(items, lambda item: convert_value(item.power), filter_el.power_min)
+    items = filter_max(items, lambda item: convert_value(item.power), filter_el.power_max)
+    items = filter_min(items, lambda item: convert_value(item.fuel_tanck_capacity), filter_el.fuel_tank_capacity_min)
+    items = filter_max(items, lambda item: convert_value(item.fuel_tanck_capacity), filter_el.fuel_tank_capacity_max)
+    items = filter_min(items, lambda item: convert_value(item.height), filter_el.height_min)
+    items = filter_max(items, lambda item: convert_value(item.height), filter_el.height_max)
+    items = filter_min(items, lambda item: convert_value(item.cylinder_number), filter_el.cylinder_number_min)
+    items = filter_max(items, lambda item: convert_value(item.cylinder_number), filter_el.cylinder_number_max)
+    items = filter_min(items, lambda item: convert_value(item.load_capacity), filter_el.load_capacity_min)
+    items = filter_max(items, lambda item: convert_value(item.load_capacity), filter_el.load_capacity_max)
+    items = filter_min(items, lambda item: convert_value(item.torque), filter_el.torque_min)
+    items = filter_max(items, lambda item: convert_value(item.torque), filter_el.torque_max)
+    items = filter_min(items, lambda item: convert_value(item.trunk_volume), filter_el.trunk_volume_min)
+    items = filter_max(items, lambda item: convert_value(item.trunk_volume), filter_el.trunk_volume_max)
 
     items = filter_equal(items, lambda item: item.name, filter_el.name)
     items = filter_equal(items, lambda item: item.brand, filter_el.brand)
