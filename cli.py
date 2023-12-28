@@ -212,10 +212,10 @@ def set_filter(filter_element: Filter) -> Filter:
             elif selected_menu == "Очень не большая":
                 filter_element.weight_min = 100
                 filter_element.weight_max = 150
-            elif selected_menu == "Очень не большая":
+            elif selected_menu == "Средняя":
                 filter_element.weight_min = 150
                 filter_element.weight_max = 215
-            elif selected_menu == "Очень не большая":
+            elif selected_menu == "Не очень большая":
                 filter_element.weight_min = 215
                 filter_element.weight_max = 320
             else:

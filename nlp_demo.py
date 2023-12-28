@@ -7,8 +7,6 @@ import nltk
 # nltk.download('averaged_perceptron_tagger')
 from nltk.corpus import stopwords
 
-nltk.download('russian')
-
 
 def test():
     text = "Я хочу купить большой красивый дом"
