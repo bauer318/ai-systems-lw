@@ -83,9 +83,10 @@ class QuestionAnsweringManager:
         return res
 
     def find_by_tags(self):
-        current_data = self.find_by_weight()
-        result = []
-        return self.perfom_by_tags(current_data, result)
+        if self.request.show:
+            current_data = self.find_by_weight()
+            result = []
+            return self.perfom_by_tags(current_data, result)
 
     def transmission_case(self, tag_value, current_data: [], result: []):
         for item in current_data:

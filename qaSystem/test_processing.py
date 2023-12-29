@@ -12,6 +12,7 @@ def creates_request(text: str) -> Request:
     request = Request()
     request.tags = TagDictionary()
     flags = re.IGNORECASE
+    is_request_about_moto = False
 
     linguistic_variable_pattern = r"(не очень большой|очень не большой|маленький|средний|большой)"
     match = re.findall(linguistic_variable_pattern, text, flags)
@@ -40,6 +41,7 @@ def creates_request(text: str) -> Request:
                 request.show = True
             case "мотоцикл":
                 request.show = True
+                is_request_about_moto = True
                 if "plur" in morph.parse(word)[0].tag:
                     request.num_ = "Many"
             case _:
@@ -146,4 +148,8 @@ def creates_request(text: str) -> Request:
                                 request.tags.add('exist_turn_signal', request.exist)
 
     # print(request.to_str())
+    if not is_request_about_moto:
+        print("Я не знаю, как ответить на Ваш вопрос т.к. я разбираюсь только по теме мотоцикл")
+        request.show = False
+
     return request

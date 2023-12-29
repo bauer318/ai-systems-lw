@@ -10,7 +10,7 @@ current_request: Request
 
 def process_request(request: Request, text: str):
     global current_request
-
+    current_request = Request
     if request.and_log:
         texts = text.lower().split(" и ")
         data = []
@@ -22,6 +22,8 @@ def process_request(request: Request, text: str):
             qa_system.data = get_dataset_array()
             qa_system.find_by_tags()
             data = merges_data(qa_system.data, data, True)
+        if current_request.num_ == "One":
+            data = data[:1]
         print_final(data)
     elif request.or_log:
         texts = text.lower().split(" или ")
@@ -105,7 +107,8 @@ def loop_main() -> int:
     if selected_menu == "Введите вопрос":
         text = input("Вопрос: ")
         request = creates_request(text)
-        process_request(request, text)
+        if request.show:
+            process_request(request, text)
         return 0
     else:
         return 1
