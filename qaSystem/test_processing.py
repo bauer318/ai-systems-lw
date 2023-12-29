@@ -1,8 +1,6 @@
 import re
 
-import spacy
-from nltk import ngrams
-from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.tokenize import word_tokenize
 from pymorphy3 import MorphAnalyzer
 
 from qaSystem.request import Request
@@ -35,6 +33,7 @@ def creates_request(text: str) -> Request:
                 request.min_weight = 320
 
     words_tokenized = word_tokenize(text)
+    # print(morph.parse('синий')[0])
     for word in words_tokenized:
         match morph.parse(word)[0].normal_form:
             case "показать" | "какой" | "дать" | "вывести":
@@ -42,7 +41,7 @@ def creates_request(text: str) -> Request:
             case "мотоцикл":
                 request.show = True
                 if "plur" in morph.parse(word)[0].tag:
-                    request.number = "Many"
+                    request.num_ = "Many"
             case _:
                 match str(morph.parse(word)[0].tag).split(",")[0]:
                     case "PREP":
@@ -75,20 +74,24 @@ def creates_request(text: str) -> Request:
                                 request.type = "dual-sport"
                             case "красный":
                                 request.color = "Red"
-                            case "черный":
+                            case "чёрный":
                                 request.color = "Black"
                             case "белый":
                                 request.color = "White"
                             case "синий":
-                                request.color = "Blue"
-                            case "зеленый":
+                                request.color = "Bleu"
+                            case "зелёный":
                                 request.color = "Green"
-                            case "желтый":
+                            case "жёлтый":
                                 request.color = "Yellow"
                             case "серый":
                                 request.color = "Grey"
                             case "темно-синый":
                                 request.color = "Dark-bleu"
+                            case "минимальный":
+                                request.extr = "Min"
+                            case "максимальный":
+                                request.extr = "Max"
                     case "NOUN":
                         index = text.find(word)
                         target_texts = text[index:].split()
@@ -142,5 +145,5 @@ def creates_request(text: str) -> Request:
                             case "поворотник":
                                 request.tags.add('exist_turn_signal', request.exist)
 
-    print(request.to_str())
+    # print(request.to_str())
     return request

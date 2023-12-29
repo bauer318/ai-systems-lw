@@ -1,11 +1,10 @@
-from nltk import pos_tag
-from nltk.tokenize import sent_tokenize, word_tokenize
 import nltk
+from nltk import pos_tag
+from nltk.tokenize import word_tokenize
 
-# nltk.download('punkt')
-# nltk.download('stopwords')
-# nltk.download('averaged_perceptron_tagger')
-from nltk.corpus import stopwords
+#nltk.download('punkt')
+#nltk.download('stopwords')
+#nltk.download('averaged_perceptron_tagger')
 
 
 def test():

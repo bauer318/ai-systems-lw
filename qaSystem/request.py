@@ -7,7 +7,7 @@ class Request:
     type: str = None
     min_weight: float = None
     max_weight: float = None
-    number: str = "One"
+    num_: str = "One"
     tags: TagDictionary
     exist: bool = False
     extr: str = None
@@ -17,7 +17,7 @@ class Request:
     def to_str(self):
         print(
             f'show: {self.show}\n'
-            f'number: {self.number}\n'
+            f'number: {self.num_}\n'
             f'color: {self.color}\n'
             f'type: {self.type}\n'
             f'min weight: {self.min_weight}\n'

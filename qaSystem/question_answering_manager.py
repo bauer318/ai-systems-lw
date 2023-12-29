@@ -1,6 +1,6 @@
 from datasetitem import DatasetItem
 from qaSystem.request import Request
-from util import get_motorcycle_type
+from util import get_motorcycle_type, convert_value
 
 
 class QuestionAnsweringManager:
@@ -20,6 +20,8 @@ class QuestionAnsweringManager:
     def find_by_color(self):
         result = []
         request_ = self.request
+        if request_.color is None:
+            return self.get_result(self.data)
         for item in self.data:
             if request_.color is not None and item.color == request_.color:
                 result.append(item)
@@ -35,55 +37,55 @@ class QuestionAnsweringManager:
     def find_by_type(self):
         current_data = self.find_by_color()
         result = []
+        if self.request.type is None:
+            return self.get_result(current_data)
         for item in current_data:
-            if self.request.type is not None:
-                motorcycle_type = get_motorcycle_type(item)
-                match self.request.type:
-                    case 'road':
-                        if (motorcycle_type == "Cruiser" or
-                                motorcycle_type == "Sport Motorcycle" or
-                                motorcycle_type == "Sport Tourer"):
-                            result.append(item)
-                    case 'off-road':
-                        if (motorcycle_type == "Enduro" or
-                                motorcycle_type == "Motocross"):
-                            result.append(item)
-                    case 'dual-sport':
-                        if motorcycle_type == "Touring Motorcycle":
-                            result.append(item)
-            else:
-                result = current_data
+            motorcycle_type = get_motorcycle_type(item)
+            match self.request.type:
+                case 'road':
+                    if (motorcycle_type == "Cruiser" or
+                            motorcycle_type == "Sport Motorcycle" or
+                            motorcycle_type == "Sport Tourer"):
+                        result.append(item)
+                case 'off-road':
+                    if (motorcycle_type == "Enduro" or
+                            motorcycle_type == "Motocross"):
+                        result.append(item)
+                case 'dual-sport':
+                    if motorcycle_type == "Touring Motorcycle":
+                        result.append(item)
+
         res = self.get_result(result)
         # self.print("Type")
         return res
 
     def find_by_weight(self):
         current_data = self.find_by_type()
-        result = [DatasetItem]
+        result = []
         if self.request.min_weight is None and self.request.max_weight is None:
             return self.get_result(current_data)
 
         for item in current_data:
             if self.request.min_weight is not None:
                 if self.request.max_weight is not None:
-                    if self.request.min_weight <= item.weight <= self.request.max_weight:
+                    if self.request.min_weight <= convert_value(item.weight) <= self.request.max_weight:
                         result.append(item)
                 else:
-                    if self.request.min_weight <= item.weight:
+                    if self.request.min_weight <= convert_value(item.weight):
                         result.append(item)
             elif self.request.max_weight is not None:
-                if self.request.max_weight >= item.weight:
+                if self.request.max_weight >= convert_value(item.weight):
                     result.append(item)
+
         res = self.get_result(result)
+
         # self.print("Weight")
         return res
 
     def find_by_tags(self):
         current_data = self.find_by_weight()
         result = []
-        # if self.request.or_log:
-        return self.or_logic(current_data, result)
-        # return self.get_result(result)
+        return self.perfom_by_tags(current_data, result)
 
     def transmission_case(self, tag_value, current_data: [], result: []):
         for item in current_data:
@@ -130,7 +132,9 @@ class QuestionAnsweringManager:
                 if not item.exist_turn_signal:
                     result.append(item)
 
-    def or_logic(self, current_data: [], result: []):
+    def perfom_by_tags(self, current_data: [], result: []):
+        if len(self.request.tags.keys()) == 0:
+            return self.get_result(current_data)
         for tag in self.request.tags.keys():
             tag_value = self.request.tags[tag]
             match tag:
@@ -153,6 +157,6 @@ class QuestionAnsweringManager:
         print(f"\n===={title}=====")
         if self.data:
             for item in self.data:
-                print(item.name)
+                print(item.name, f'Масса: {item.weight} Цвет: {item.color} Объем двигателя: {item.engine_capacity}')
         else:
             print("Empty")
