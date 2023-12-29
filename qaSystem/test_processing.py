@@ -34,7 +34,7 @@ def creates_request(text: str) -> Request:
                 request.min_weight = 320
 
     words_tokenized = word_tokenize(text)
-    # print(morph.parse('синий')[0])
+    print(morph.parse('минимальной')[0])
     for word in words_tokenized:
         match morph.parse(word)[0].normal_form:
             case "показать" | "какой" | "дать" | "вывести":
@@ -66,7 +66,7 @@ def creates_request(text: str) -> Request:
                         match word.lower():
                             case "нет":
                                 request.exist = False
-                    case "ADJF":
+                    case "ADJF" | "ADJF femn" | "ADJF masc" | "ADJF neut":
                         match morph.parse(word)[0].normal_form:
                             case "дорожный":
                                 request.type = "road"

@@ -101,13 +101,13 @@ class QuestionAnsweringManager:
         for item in current_data:
             if self.request.extr is not None:
                 if self.request.extr == "Max":
-                    if item.height <= tag_value:
+                    if convert_value(item.height) <= tag_value:
                         result.append(item)
                 else:
-                    if item.height >= tag_value:
+                    if convert_value(item.height) >= tag_value:
                         result.append(item)
             else:
-                if item.height == tag_value:
+                if convert_value(item.height) == tag_value:
                     result.append(item)
 
     def engine_capacity_case(self, tag_value, current_data: [], result: []):
